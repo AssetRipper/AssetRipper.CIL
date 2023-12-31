@@ -1,0 +1,27 @@
+<Project>
+	<PropertyGroup>
+		<LangVersion>Latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<IsAotCompatible>true</IsAotCompatible>
+		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+		<PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
+
+		<Version>1.0.0</Version>
+		<AssemblyVersion>$(Version)</AssemblyVersion>
+		<Copyright>Copyright (c) 2024 ds5678</Copyright>
+		<Authors>ds5678</Authors>
+		<Company>AssetRipper</Company>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/AssetRipper/AssetRipper.CIL</RepositoryUrl>
+		<PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+		<IsTrimmable>true</IsTrimmable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+		<IsAotCompatible>true</IsAotCompatible>
+	</PropertyGroup>
+</Project>

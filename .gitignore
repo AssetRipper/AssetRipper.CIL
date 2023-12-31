@@ -1,0 +1,7 @@
+bin/
+obj/
+*.csproj.user
+.vs/
+.idea/
+.vscode/
+launchSettings.json
