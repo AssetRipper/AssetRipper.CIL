@@ -38,26 +38,16 @@ public static class MethodStubber
 
 		if (methodDefinition.ShouldCallBaseConstructor() && TryGetBaseConstructor(methodDefinition, out IMethodDescriptor? baseConstructor))
 		{
-			if (baseConstructor is MethodDefinition baseConstructorDef)
+			MethodSignature? methodSignature = baseConstructor.Signature;
+			if (methodSignature is not null)
 			{
 				methodInstructions.Add(CilOpCodes.Ldarg_0);
-				foreach (Parameter baseParameter in baseConstructorDef.Parameters)
-				{
-					TypeSignature importedBaseParameterType = methodDefinition.DeclaringType!.Module!.DefaultImporter.ImportTypeSignature(baseParameter.ParameterType);
-					methodInstructions.AddDefaultValueForType(importedBaseParameterType);
-				}
-				methodInstructions.Add(CilOpCodes.Call, baseConstructorDef);
-			}
-			else if (baseConstructor is MemberReference baseConstructorRef)
-			{
-				methodInstructions.Add(CilOpCodes.Ldarg_0);
-				foreach (TypeSignature baseParameterType in ((MethodSignature)baseConstructorRef.Signature!).ParameterTypes)
+				foreach (TypeSignature baseParameterType in methodSignature.ParameterTypes)
 				{
 					methodInstructions.AddDefaultValueForType(baseParameterType);
 				}
-				methodInstructions.Add(CilOpCodes.Call, baseConstructorRef);
+				methodInstructions.Add(CilOpCodes.Call, baseConstructor);
 			}
-			//Constructors cannot be MethodSpecifications, so no need to handle that case.
 		}
 
 		foreach (Parameter parameter in methodDefinition.Parameters)
