@@ -22,16 +22,31 @@ public static class MethodStubber
 
 		if (methodDefinition.IsAutoPropertyGetMethod(out FieldDefinition? backingField))
 		{
-			methodInstructions.Add(CilOpCodes.Ldarg_0);
-			methodInstructions.Add(CilOpCodes.Ldfld, backingField);
+			if (methodDefinition.IsStatic)
+			{
+				methodInstructions.Add(CilOpCodes.Ldsfld, backingField);
+			}
+			else
+			{
+				methodInstructions.Add(CilOpCodes.Ldarg_0);
+				methodInstructions.Add(CilOpCodes.Ldfld, backingField);
+			}
 			methodInstructions.Add(CilOpCodes.Ret);
 			return;
 		}
 		else if (methodDefinition.IsAutoPropertySetMethod(out backingField))
 		{
-			methodInstructions.Add(CilOpCodes.Ldarg_0);
-			methodInstructions.Add(CilOpCodes.Ldarg_1);
-			methodInstructions.Add(CilOpCodes.Stfld, backingField);
+			if (methodDefinition.IsStatic)
+			{
+				methodInstructions.Add(CilOpCodes.Ldarg_0);
+				methodInstructions.Add(CilOpCodes.Stsfld, backingField);
+			}
+			else
+			{
+				methodInstructions.Add(CilOpCodes.Ldarg_0);
+				methodInstructions.Add(CilOpCodes.Ldarg_1);
+				methodInstructions.Add(CilOpCodes.Stfld, backingField);
+			}
 			methodInstructions.Add(CilOpCodes.Ret);
 			return;
 		}
