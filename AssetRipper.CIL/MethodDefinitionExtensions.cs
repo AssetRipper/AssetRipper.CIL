@@ -15,7 +15,20 @@ internal static class MethodDefinitionExtensions
 
 	public static bool ShouldCallBaseConstructor(this MethodDefinition methodDefinition)
 	{
-		return methodDefinition.IsInstanceConstructor() && methodDefinition.DeclaringType?.IsValueType is not true;
+		return methodDefinition.IsInstanceConstructor() && !methodDefinition.IsDeclaredByValueType();
+	}
+
+	/// <summary>
+	/// Is this method declared inside a struct?
+	/// </summary>
+	public static bool IsDeclaredByValueType(this MethodDefinition methodDefinition)
+	{
+		return methodDefinition.DeclaringType?.IsValueType is true;
+	}
+
+	public static bool ShouldInitializeFields(this MethodDefinition methodDefinition)
+	{
+		return methodDefinition.IsInstanceConstructor() && methodDefinition.IsDeclaredByValueType();
 	}
 
 	public static bool IsManagedMethodWithBody(this MethodDefinition managedMethod)

@@ -51,6 +51,22 @@ public static class MethodStubber
 			return;
 		}
 
+		if (methodDefinition.ShouldInitializeFields())
+		{
+			TypeDefinition declaringType = methodDefinition.DeclaringType!;
+			foreach (FieldDefinition field in declaringType.Fields)
+			{
+				if (field.IsStatic || field.Signature is null)
+				{
+					continue;
+				}
+
+				methodInstructions.Add(CilOpCodes.Ldarg_0);
+				methodInstructions.AddDefaultValueForType(field.Signature.FieldType);
+				methodInstructions.Add(CilOpCodes.Stfld, field);
+			}
+		}
+
 		if (methodDefinition.ShouldCallBaseConstructor() && TryGetBaseConstructor(methodDefinition, out IMethodDescriptor? baseConstructor))
 		{
 			MethodSignature? methodSignature = baseConstructor.Signature;
