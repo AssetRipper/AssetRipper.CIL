@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace AssetRipper.CIL;
 
-internal static class CilInstructionCollectionExtensions
+public static class CilInstructionCollectionExtensions
 {
 	public static CilLocalVariable AddLocalVariable(this CilInstructionCollection instructions, TypeSignature variableType)
 	{
@@ -16,7 +16,7 @@ internal static class CilInstructionCollectionExtensions
 		return variable;
 	}
 
-	public static void AddDefaultValueForType(this CilInstructionCollection instructions, TypeSignature type)
+	public static void AddDefaultValue(this CilInstructionCollection instructions, TypeSignature type)
 	{
 		if (type is CorLibTypeSignature { IsValueType: true } corLibTypeSignature)
 		{
@@ -37,6 +37,60 @@ internal static class CilInstructionCollectionExtensions
 	}
 
 	/// <summary>
+	/// Remove the last instruction in the collection
+	/// </summary>
+	/// <param name="instructions">The collection to remove the instruction from</param>
+	public static void Pop(this CilInstructionCollection instructions) => instructions.RemoveAt(instructions.Count - 1);
+
+	public static CilInstruction AddLoadElement(this CilInstructionCollection instructions, TypeSignature elementType)
+	{
+		return elementType switch
+		{
+			CorLibTypeSignature corLibTypeSignature => corLibTypeSignature.ElementType switch
+			{
+				ElementType.Boolean => instructions.Add(CilOpCodes.Ldelem_U1),
+				ElementType.I1 => instructions.Add(CilOpCodes.Ldelem_I1),
+				ElementType.U1 => instructions.Add(CilOpCodes.Ldelem_U1),
+				ElementType.I2 => instructions.Add(CilOpCodes.Ldelem_I2),
+				ElementType.U2 => instructions.Add(CilOpCodes.Ldelem_U2),
+				ElementType.I4 => instructions.Add(CilOpCodes.Ldelem_I4),
+				ElementType.U4 => instructions.Add(CilOpCodes.Ldelem_U4),
+				ElementType.I8 => instructions.Add(CilOpCodes.Ldelem_I8),
+				ElementType.U8 => instructions.Add(CilOpCodes.Ldelem_I8),
+				ElementType.R4 => instructions.Add(CilOpCodes.Ldelem_R4),
+				ElementType.R8 => instructions.Add(CilOpCodes.Ldelem_R8),
+				_ => elementType.IsValueType ? instructions.Add(CilOpCodes.Ldelem) : instructions.Add(CilOpCodes.Ldelem_Ref)
+			},
+			GenericParameterSignature => instructions.Add(CilOpCodes.Ldelem),
+			_ => elementType.IsValueType ? instructions.Add(CilOpCodes.Ldelem) : instructions.Add(CilOpCodes.Ldelem_Ref)
+		};
+	}
+
+	public static CilInstruction AddStoreElement(this CilInstructionCollection instructions, TypeSignature elementType)
+	{
+		return elementType switch
+		{
+			CorLibTypeSignature corLibTypeSignature => corLibTypeSignature.ElementType switch
+			{
+				ElementType.Boolean => instructions.Add(CilOpCodes.Stelem_I1),
+				ElementType.I1 => instructions.Add(CilOpCodes.Stelem_I1),
+				ElementType.U1 => instructions.Add(CilOpCodes.Stelem_I1),
+				ElementType.I2 => instructions.Add(CilOpCodes.Stelem_I2),
+				ElementType.U2 => instructions.Add(CilOpCodes.Stelem_I2),
+				ElementType.I4 => instructions.Add(CilOpCodes.Stelem_I4),
+				ElementType.U4 => instructions.Add(CilOpCodes.Stelem_I4),
+				ElementType.I8 => instructions.Add(CilOpCodes.Stelem_I8),
+				ElementType.U8 => instructions.Add(CilOpCodes.Stelem_I8),
+				ElementType.R4 => instructions.Add(CilOpCodes.Stelem_R4),
+				ElementType.R8 => instructions.Add(CilOpCodes.Stelem_R8),
+				_ => instructions.Add(CilOpCodes.Stelem_Ref),
+			},
+			GenericParameterSignature => instructions.Add(CilOpCodes.Stelem),
+			_ => elementType.IsValueType ? instructions.Add(CilOpCodes.Stelem) : instructions.Add(CilOpCodes.Stelem_Ref)
+		};
+	}
+
+	/// <summary>
 	/// Load a null reference onto the stack.
 	/// </summary>
 	/// <remarks>
@@ -46,7 +100,7 @@ internal static class CilInstructionCollectionExtensions
 	/// However, it does produce a compiler warning.
 	/// </remarks>
 	/// <param name="instructions"></param>
-	private static void AddNullRef(this CilInstructionCollection instructions)
+	public static void AddNullRef(this CilInstructionCollection instructions)
 	{
 		instructions.Add(CilOpCodes.Ldc_I4_0);
 		instructions.Add(CilOpCodes.Conv_U);

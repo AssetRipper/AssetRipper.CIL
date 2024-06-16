@@ -61,7 +61,7 @@ public static class MethodStubber
 				}
 
 				methodInstructions.Add(CilOpCodes.Ldarg_0);
-				methodInstructions.AddDefaultValueForType(field.Signature.FieldType);
+				methodInstructions.AddDefaultValue(field.Signature.FieldType);
 				methodInstructions.Add(CilOpCodes.Stfld, field);
 			}
 		}
@@ -74,7 +74,7 @@ public static class MethodStubber
 				methodInstructions.Add(CilOpCodes.Ldarg_0);
 				foreach (TypeSignature baseParameterType in methodSignature.ParameterTypes)
 				{
-					methodInstructions.AddDefaultValueForType(baseParameterType);
+					methodInstructions.AddDefaultValue(baseParameterType);
 				}
 				methodInstructions.Add(CilOpCodes.Call, baseConstructor);
 			}
@@ -102,7 +102,7 @@ public static class MethodStubber
 				}
 			}
 		}
-		methodInstructions.AddDefaultValueForType(methodDefinition.Signature!.ReturnType);
+		methodInstructions.AddDefaultValue(methodDefinition.Signature!.ReturnType);
 		methodInstructions.Add(CilOpCodes.Ret);
 		methodInstructions.OptimizeMacros();
 	}
