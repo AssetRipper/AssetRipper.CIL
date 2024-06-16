@@ -1,4 +1,5 @@
 ﻿using AsmResolver.DotNet;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using System.Diagnostics.CodeAnalysis;
@@ -110,5 +111,27 @@ public static class MethodDefinitionExtensions
 			backingField = field;
 			return true;
 		}
+	}
+
+	public static Parameter AddParameter(this MethodDefinition method, TypeSignature parameterSignature, string parameterName)
+	{
+		return method.AddParameter(parameterSignature, parameterName, out _);
+	}
+
+	public static Parameter AddParameter(this MethodDefinition method, TypeSignature parameterSignature, string parameterName, out ParameterDefinition parameterDefinition)
+	{
+		parameterDefinition = new ParameterDefinition((ushort)(method.Signature!.ParameterTypes.Count + 1), parameterName, default);
+		method.Signature.ParameterTypes.Add(parameterSignature);
+		method.ParameterDefinitions.Add(parameterDefinition);
+
+		method.Parameters.PullUpdatesFromMethodSignature();
+		return method.Parameters.Single(parameter => parameter.Name == parameterName && parameter.ParameterType == parameterSignature);
+	}
+
+	public static Parameter AddParameter(this MethodDefinition method, TypeSignature parameterSignature)
+	{
+		method.Signature!.ParameterTypes.Add(parameterSignature);
+		method.Parameters.PullUpdatesFromMethodSignature();
+		return method.Parameters[^1];
 	}
 }
