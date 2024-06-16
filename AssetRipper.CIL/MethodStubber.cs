@@ -7,9 +7,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace AssetRipper.CIL;
 
-public static class MethodStubber
+internal static class MethodStubber
 {
-	public static void FillMethodBodyWithStub(this MethodDefinition methodDefinition)
+	public static void FillMethodBodyWithStub(MethodDefinition methodDefinition)
 	{
 		if (!methodDefinition.IsManagedMethodWithBody())
 		{

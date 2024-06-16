@@ -5,14 +5,29 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace AssetRipper.CIL;
 
-internal static class MethodDefinitionExtensions
+public static class MethodDefinitionExtensions
 {
+	/// <summary>
+	/// Replaces the method body with a sensible minimal implementation.
+	/// If the method is for an auto-property, the method will be replaced with a simple getter or setter.
+	/// Otherwise, the method content will be filled with a valid default implementation that does not throw
+	/// and handles all required logic, such as setting out parameters.
+	/// </summary>
+	/// <remarks>
+	/// If the method is not managed or should not have a body, this method does nothing.
+	/// </remarks>
+	/// <param name="methodDefinition">The method to modify.</param>
+	public static void ReplaceMethodBodyWithMinimalImplementation(this MethodDefinition methodDefinition)
+	{
+		MethodStubber.FillMethodBodyWithStub(methodDefinition);
+	}
+
 	public static bool IsInstanceConstructor(this MethodDefinition methodDefinition)
 	{
 		return methodDefinition.IsConstructor && !methodDefinition.IsStatic;
 	}
 
-	public static bool ShouldCallBaseConstructor(this MethodDefinition methodDefinition)
+	internal static bool ShouldCallBaseConstructor(this MethodDefinition methodDefinition)
 	{
 		return methodDefinition.IsInstanceConstructor() && !methodDefinition.IsDeclaredByValueType();
 	}
@@ -25,7 +40,7 @@ internal static class MethodDefinitionExtensions
 		return methodDefinition.DeclaringType?.IsValueType is true;
 	}
 
-	public static bool ShouldInitializeFields(this MethodDefinition methodDefinition)
+	internal static bool ShouldInitializeFields(this MethodDefinition methodDefinition)
 	{
 		return methodDefinition.IsInstanceConstructor() && methodDefinition.IsDeclaredByValueType();
 	}
