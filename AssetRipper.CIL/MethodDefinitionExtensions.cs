@@ -1,7 +1,6 @@
 ﻿using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using System.Diagnostics.CodeAnalysis;
 
 namespace AssetRipper.CIL;

@@ -1,5 +1,5 @@
 ﻿using AsmResolver.DotNet.Collections;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using System.Diagnostics.CodeAnalysis;
 
 namespace AssetRipper.CIL;
