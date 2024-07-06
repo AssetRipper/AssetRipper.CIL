@@ -36,11 +36,40 @@ public static class CilInstructionCollectionExtensions
 		}
 	}
 
+	public static void InitializeDefaultValue(this CilInstructionCollection instructions, CilLocalVariable localVariable)
+	{
+		TypeSignature type = localVariable.VariableType;
+		if (type is CorLibTypeSignature { IsValueType: true } corLibTypeSignature)
+		{
+			instructions.InitializeDefaultPrimitiveValue(corLibTypeSignature, localVariable);
+		}
+		else if (type is ByReferenceTypeSignature)
+		{
+			instructions.AddNullRef();
+			instructions.Add(CilOpCodes.Stloc, localVariable);
+		}
+		else if (type.IsValueTypeOrGenericParameter())
+		{
+			instructions.InitializeDefaultValueForUnknownType(localVariable);
+		}
+		else
+		{
+			instructions.Add(CilOpCodes.Ldnull);
+			instructions.Add(CilOpCodes.Stloc, localVariable);
+		}
+	}
+
 	/// <summary>
 	/// Remove the last instruction in the collection
 	/// </summary>
 	/// <param name="instructions">The collection to remove the instruction from</param>
 	public static void Pop(this CilInstructionCollection instructions) => instructions.RemoveAt(instructions.Count - 1);
+
+	public static void AddBooleanNot(this CilInstructionCollection instructions)
+	{
+		instructions.Add(CilOpCodes.Ldc_I4_0);
+		instructions.Add(CilOpCodes.Ceq);
+	}
 
 	public static CilInstruction AddLoadElement(this CilInstructionCollection instructions, TypeSignature elementType)
 	{
@@ -90,6 +119,52 @@ public static class CilInstructionCollectionExtensions
 		};
 	}
 
+	public static CilInstruction AddLoadIndirect(this CilInstructionCollection instructions, TypeSignature type)
+	{
+		return type switch
+		{
+			CorLibTypeSignature corLibTypeSignature => corLibTypeSignature.ElementType switch
+			{
+				ElementType.I1 => instructions.Add(CilOpCodes.Ldind_I1),
+				ElementType.I2 => instructions.Add(CilOpCodes.Ldind_I2),
+				ElementType.I4 => instructions.Add(CilOpCodes.Ldind_I4),
+				ElementType.I8 or ElementType.U8 => instructions.Add(CilOpCodes.Ldind_I8),
+				ElementType.U1 => instructions.Add(CilOpCodes.Ldind_U1),
+				ElementType.U2 => instructions.Add(CilOpCodes.Ldind_U2),
+				ElementType.U4 => instructions.Add(CilOpCodes.Ldind_U4),
+				ElementType.R4 => instructions.Add(CilOpCodes.Ldind_R4),
+				ElementType.R8 => instructions.Add(CilOpCodes.Ldind_R8),
+				ElementType.I or ElementType.U => instructions.Add(CilOpCodes.Ldind_I),
+				_ => instructions.Add(CilOpCodes.Ldobj, type.ToTypeDefOrRef()),
+			},
+			PointerTypeSignature => instructions.Add(CilOpCodes.Ldind_I),
+			_ => instructions.Add(CilOpCodes.Ldobj, type.ToTypeDefOrRef()),
+		};
+	}
+
+	public static CilInstruction AddStoreIndirect(this CilInstructionCollection instructions, TypeSignature type)
+	{
+		return type switch
+		{
+			CorLibTypeSignature corLibTypeSignature => corLibTypeSignature.ElementType switch
+			{
+				ElementType.I1 => instructions.Add(CilOpCodes.Stind_I1),
+				ElementType.I2 => instructions.Add(CilOpCodes.Stind_I2),
+				ElementType.I4 => instructions.Add(CilOpCodes.Stind_I4),
+				ElementType.I8 or ElementType.U8 => instructions.Add(CilOpCodes.Stind_I8),
+				ElementType.U1 => instructions.Add(CilOpCodes.Stind_I1),
+				ElementType.U2 => instructions.Add(CilOpCodes.Stind_I2),
+				ElementType.U4 => instructions.Add(CilOpCodes.Stind_I4),
+				ElementType.R4 => instructions.Add(CilOpCodes.Stind_R4),
+				ElementType.R8 => instructions.Add(CilOpCodes.Stind_R8),
+				ElementType.I or ElementType.U => instructions.Add(CilOpCodes.Stind_I),
+				_ => instructions.Add(CilOpCodes.Stobj, type.ToTypeDefOrRef()),
+			},
+			PointerTypeSignature => instructions.Add(CilOpCodes.Stind_I),
+			_ => instructions.Add(CilOpCodes.Stobj, type.ToTypeDefOrRef()),
+		};
+	}
+
 	/// <summary>
 	/// Load a null reference onto the stack.
 	/// </summary>
@@ -116,11 +191,17 @@ public static class CilInstructionCollectionExtensions
 	/// <param name="type"></param>
 	private static void AddDefaultValueForUnknownType(this CilInstructionCollection instructions, TypeSignature type)
 	{
-		Debug.Assert(type is not CorLibTypeSignature { ElementType: ElementType.Void } and not ByReferenceTypeSignature);
 		CilLocalVariable variable = instructions.AddLocalVariable(type);
-		instructions.Add(CilOpCodes.Ldloca, variable);
-		instructions.Add(CilOpCodes.Initobj, type.ToTypeDefOrRef());
+		InitializeDefaultValueForUnknownType(instructions, variable);
 		instructions.Add(CilOpCodes.Ldloc, variable);
+	}
+
+	private static void InitializeDefaultValueForUnknownType(this CilInstructionCollection instructions, CilLocalVariable localVariable)
+	{
+		TypeSignature type = localVariable.VariableType;
+		Debug.Assert(type is not CorLibTypeSignature { ElementType: ElementType.Void } and not ByReferenceTypeSignature);
+		instructions.Add(CilOpCodes.Ldloca, localVariable);
+		instructions.Add(CilOpCodes.Initobj, type.ToTypeDefOrRef());
 	}
 
 	private static void AddDefaultPrimitiveValue(this CilInstructionCollection instructions, CorLibTypeSignature type)
@@ -158,10 +239,58 @@ public static class CilInstructionCollectionExtensions
 				instructions.Add(CilOpCodes.Ldnull);
 				break;
 			case ElementType.TypedByRef:
+			default:
 				instructions.AddDefaultValueForUnknownType(type);
 				break;
+		}
+	}
+
+	private static void InitializeDefaultPrimitiveValue(this CilInstructionCollection instructions, CorLibTypeSignature type, CilLocalVariable localVariable)
+	{
+		switch (type.ElementType)
+		{
+			case ElementType.Void:
+				break;
+			case ElementType.U1 or ElementType.U2 or ElementType.U4 or ElementType.I1 or ElementType.I2 or ElementType.I4 or ElementType.Boolean or ElementType.Char:
+				instructions.Add(CilOpCodes.Ldc_I4_0);
+				instructions.Add(CilOpCodes.Stloc, localVariable);
+				break;
+			case ElementType.I8:
+				instructions.Add(CilOpCodes.Ldc_I4_0);
+				instructions.Add(CilOpCodes.Conv_I8);
+				instructions.Add(CilOpCodes.Stloc, localVariable);
+				break;
+			case ElementType.U8:
+				instructions.Add(CilOpCodes.Ldc_I4_0);
+				instructions.Add(CilOpCodes.Conv_U8);
+				instructions.Add(CilOpCodes.Stloc, localVariable);
+				break;
+			case ElementType.I:
+				instructions.Add(CilOpCodes.Ldc_I4_0);
+				instructions.Add(CilOpCodes.Conv_I);
+				instructions.Add(CilOpCodes.Stloc, localVariable);
+				break;
+			case ElementType.U:
+				instructions.Add(CilOpCodes.Ldc_I4_0);
+				instructions.Add(CilOpCodes.Conv_U);
+				instructions.Add(CilOpCodes.Stloc, localVariable);
+				break;
+			case ElementType.R4:
+				instructions.Add(CilOpCodes.Ldc_R4, 0f);
+				instructions.Add(CilOpCodes.Stloc, localVariable);
+				break;
+			case ElementType.R8:
+				instructions.Add(CilOpCodes.Ldc_R8, 0d);
+				instructions.Add(CilOpCodes.Stloc, localVariable);
+				break;
+			case ElementType.Object or ElementType.String:
+				instructions.Add(CilOpCodes.Ldnull);
+				instructions.Add(CilOpCodes.Stloc, localVariable);
+				break;
+			case ElementType.TypedByRef:
 			default:
-				throw new ArgumentOutOfRangeException(null);
+				instructions.InitializeDefaultValueForUnknownType(localVariable);
+				break;
 		}
 	}
 }
