@@ -36,12 +36,22 @@ public static class MacroStandardization
 	private static void RemoveNopInstructions(this CilInstructionCollection instructions)
 	{
 		// Find labels that reference nop instructions.
-		List<CilInstructionLabel> nopLabels = new();
+		HashSet<CilInstructionLabel> nopLabels = new();
 		foreach (CilInstruction instruction in instructions)
 		{
 			if (instruction.Operand is CilInstructionLabel { Instruction: not null } label && label.Instruction.OpCode == CilOpCodes.Nop)
 			{
 				nopLabels.Add(label);
+			}
+			else if (instruction.Operand is CilInstructionLabel[] labels) // switch
+			{
+				foreach (CilInstructionLabel l in labels)
+				{
+					if (l.Instruction is not null && l.Instruction.OpCode == CilOpCodes.Nop)
+					{
+						nopLabels.Add(l);
+					}
+				}
 			}
 		}
 
