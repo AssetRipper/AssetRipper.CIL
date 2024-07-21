@@ -13,24 +13,6 @@ public static class MacroStandardization
 	{
 		instructions.ExpandMacros();
 		instructions.RemoveNopInstructions();
-		instructions.ReplaceBrFalseWithBrTrue();
-	}
-
-	private static void ReplaceBrFalseWithBrTrue(this CilInstructionCollection instructions)
-	{
-		for (int i = instructions.Count - 1; i >= 0; i--)
-		{
-			CilInstruction instruction = instructions[i];
-			if (instruction.OpCode == CilOpCodes.Brfalse)
-			{
-				// Boolean not
-				instructions.Insert(i, CilOpCodes.Ceq);
-				instructions.Insert(i, CilOpCodes.Ldc_I4, 0);
-
-				// Preserve the operand, but change the opcode.
-				instruction.OpCode = CilOpCodes.Brtrue;
-			}
-		}
 	}
 
 	private static void RemoveNopInstructions(this CilInstructionCollection instructions)
