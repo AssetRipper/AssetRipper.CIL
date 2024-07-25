@@ -23,9 +23,25 @@ public static class MethodDefinitionExtensions
 		MethodStubber.FillMethodBodyWithStub(methodDefinition);
 	}
 
+	public static bool IsInstance(this MethodDefinition methodDefinition)
+	{
+		return !methodDefinition.IsStatic;
+	}
+
 	public static bool IsInstanceConstructor(this MethodDefinition methodDefinition)
 	{
-		return methodDefinition.IsConstructor && !methodDefinition.IsStatic;
+		return methodDefinition.IsConstructor && methodDefinition.IsInstance();
+	}
+
+	public static bool IsStaticConstructor(this MethodDefinition methodDefinition)
+	{
+		return methodDefinition.IsConstructor && methodDefinition.IsStatic;
+	}
+
+	public static bool HasReturnType(this MethodDefinition methodDefinition)
+	{
+		return methodDefinition.Signature is not null
+			&& methodDefinition.Signature.ReturnType is not CorLibTypeSignature { ElementType: ElementType.Void };
 	}
 
 	internal static bool ShouldCallBaseConstructor(this MethodDefinition methodDefinition)

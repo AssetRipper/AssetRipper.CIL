@@ -26,4 +26,9 @@ public static class TypeDefinitionExtensions
 
 		return result;
 	}
+
+	public static bool IsStaticClass(this TypeDefinition type)
+	{
+		return type.IsSealed && type.IsAbstract;
+	}
 }
