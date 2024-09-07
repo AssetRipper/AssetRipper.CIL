@@ -87,8 +87,9 @@ public static class MethodDefinitionExtensions
 		string backingFieldName = $"<{method.Name.Value[4..]}>k__BackingField";
 		FieldDefinition? field = method.DeclaringType.Fields.FirstOrDefault(f => f.Name == backingFieldName);
 		if (field is null
-			|| !SignatureComparer.Default.Equals(field.Signature?.FieldType, method.Signature?.ReturnType)
-			|| field.IsStatic != method.IsStatic)
+			|| !field.IsPrivate
+			|| field.IsStatic != method.IsStatic
+			|| !SignatureComparer.Default.Equals(field.Signature?.FieldType, method.Signature?.ReturnType))
 		{
 			backingField = null;
 			return false;
@@ -116,8 +117,9 @@ public static class MethodDefinitionExtensions
 		string backingFieldName = $"<{method.Name.Value[4..]}>k__BackingField";
 		FieldDefinition? field = method.DeclaringType.Fields.FirstOrDefault(f => f.Name == backingFieldName);
 		if (field is null
-			|| !SignatureComparer.Default.Equals(field.Signature?.FieldType, method.Parameters[0].ParameterType)
-			|| field.IsStatic != method.IsStatic)
+			|| !field.IsPrivate
+			|| field.IsStatic != method.IsStatic
+			|| !SignatureComparer.Default.Equals(field.Signature?.FieldType, method.Parameters[0].ParameterType))
 		{
 			backingField = null;
 			return false;
