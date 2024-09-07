@@ -1,5 +1,6 @@
 ﻿using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AssetRipper.CIL;
 
@@ -32,7 +33,7 @@ public static class EventDefinitionExtensions
 		return eventDefinition.FireMethod is not null;
 	}
 
-	public static bool HasBackingField(this EventDefinition eventDefinition, out FieldDefinition? backingField)
+	public static bool HasBackingField(this EventDefinition eventDefinition, [NotNullWhen(true)] out FieldDefinition? backingField)
 	{
 		TypeSignature? eventType = eventDefinition.EventType?.ToTypeSignature();
 		if (eventType is not null)
