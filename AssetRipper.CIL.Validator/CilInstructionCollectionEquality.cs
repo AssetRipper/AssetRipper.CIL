@@ -10,6 +10,7 @@ public static class CilInstructionCollectionEquality
 {
 	public static bool Equals(CilMethodBody left, CilMethodBody right)
 	{
+		// Local Variables
 		if (left.LocalVariables.Count != right.LocalVariables.Count)
 		{
 			return false;
@@ -22,7 +23,32 @@ public static class CilInstructionCollectionEquality
 			}
 		}
 
+		// Exception Handlers
+		if (left.ExceptionHandlers.Count != right.ExceptionHandlers.Count)
+		{
+			return false;
+		}
+		for (int i = 0; i < left.ExceptionHandlers.Count; i++)
+		{
+			if (!Equals(left.ExceptionHandlers[i], right.ExceptionHandlers[i]))
+			{
+				return false;
+			}
+		}
+
+		// Instructions
 		return Equals(left.Instructions, right.Instructions); 
+	}
+
+	public static bool Equals(CilExceptionHandler left, CilExceptionHandler right)
+	{
+		return left.HandlerType == right.HandlerType
+			&& left.TryStart?.Offset == right.TryStart?.Offset
+			&& left.TryEnd?.Offset == right.TryEnd?.Offset
+			&& left.HandlerStart?.Offset == right.HandlerStart?.Offset
+			&& left.HandlerEnd?.Offset == right.HandlerEnd?.Offset
+			&& left.FilterStart?.Offset == right.FilterStart?.Offset
+			&& SignatureComparer.Default.Equals(left.ExceptionType, right.ExceptionType);
 	}
 
 	public static bool Equals(CilInstructionCollection left, CilInstructionCollection right)
