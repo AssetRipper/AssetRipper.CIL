@@ -129,17 +129,36 @@ public static class CilInstructionCollectionExtensions
 				ElementType.I2 => instructions.Add(CilOpCodes.Ldind_I2),
 				ElementType.I4 => instructions.Add(CilOpCodes.Ldind_I4),
 				ElementType.I8 or ElementType.U8 => instructions.Add(CilOpCodes.Ldind_I8),
-				ElementType.U1 => instructions.Add(CilOpCodes.Ldind_U1),
-				ElementType.U2 => instructions.Add(CilOpCodes.Ldind_U2),
+				ElementType.U1 or ElementType.Boolean => instructions.Add(CilOpCodes.Ldind_U1),
+				ElementType.U2 or ElementType.Char => instructions.Add(CilOpCodes.Ldind_U2),
 				ElementType.U4 => instructions.Add(CilOpCodes.Ldind_U4),
 				ElementType.R4 => instructions.Add(CilOpCodes.Ldind_R4),
 				ElementType.R8 => instructions.Add(CilOpCodes.Ldind_R8),
 				ElementType.I or ElementType.U => instructions.Add(CilOpCodes.Ldind_I),
+				ElementType.Object or ElementType.String => instructions.Add(CilOpCodes.Ldind_Ref),
 				_ => instructions.Add(CilOpCodes.Ldobj, type.ToTypeDefOrRef()),
 			},
 			PointerTypeSignature => instructions.Add(CilOpCodes.Ldind_I),
-			_ => instructions.Add(CilOpCodes.Ldobj, type.ToTypeDefOrRef()),
+			GenericParameterSignature => instructions.Add(CilOpCodes.Ldobj, type.ToTypeDefOrRef()),
+			TypeDefOrRefSignature t => AddTypeDefOrRef(instructions, t),
+			_ => AddUnknown(instructions, type),
 		};
+
+		static CilInstruction AddUnknown(CilInstructionCollection instructions, TypeSignature type)
+		{
+			return type.IsValueType
+				? instructions.Add(CilOpCodes.Ldobj, type.ToTypeDefOrRef())
+				: instructions.Add(CilOpCodes.Ldind_Ref);
+		}
+
+		static CilInstruction AddTypeDefOrRef(CilInstructionCollection instructions, TypeDefOrRefSignature type)
+		{
+			// Check if the type is an enum
+			TypeSignature underlyingType = type.GetUnderlyingType();
+			return underlyingType is CorLibTypeSignature
+				? instructions.AddLoadIndirect(underlyingType)
+				: AddUnknown(instructions, underlyingType);
+		}
 	}
 
 	public static CilInstruction AddStoreIndirect(this CilInstructionCollection instructions, TypeSignature type)
@@ -152,17 +171,36 @@ public static class CilInstructionCollectionExtensions
 				ElementType.I2 => instructions.Add(CilOpCodes.Stind_I2),
 				ElementType.I4 => instructions.Add(CilOpCodes.Stind_I4),
 				ElementType.I8 or ElementType.U8 => instructions.Add(CilOpCodes.Stind_I8),
-				ElementType.U1 => instructions.Add(CilOpCodes.Stind_I1),
-				ElementType.U2 => instructions.Add(CilOpCodes.Stind_I2),
+				ElementType.U1 or ElementType.Boolean => instructions.Add(CilOpCodes.Stind_I1),
+				ElementType.U2 or ElementType.Char => instructions.Add(CilOpCodes.Stind_I2),
 				ElementType.U4 => instructions.Add(CilOpCodes.Stind_I4),
 				ElementType.R4 => instructions.Add(CilOpCodes.Stind_R4),
 				ElementType.R8 => instructions.Add(CilOpCodes.Stind_R8),
 				ElementType.I or ElementType.U => instructions.Add(CilOpCodes.Stind_I),
+				ElementType.Object or ElementType.String => instructions.Add(CilOpCodes.Stind_Ref),
 				_ => instructions.Add(CilOpCodes.Stobj, type.ToTypeDefOrRef()),
 			},
 			PointerTypeSignature => instructions.Add(CilOpCodes.Stind_I),
-			_ => instructions.Add(CilOpCodes.Stobj, type.ToTypeDefOrRef()),
+			GenericParameterSignature => instructions.Add(CilOpCodes.Stobj, type.ToTypeDefOrRef()),
+			TypeDefOrRefSignature t => AddTypeDefOrRef(instructions, t),
+			_ => AddUnknown(instructions, type),
 		};
+
+		static CilInstruction AddUnknown(CilInstructionCollection instructions, TypeSignature type)
+		{
+			return type.IsValueType
+				? instructions.Add(CilOpCodes.Stobj, type.ToTypeDefOrRef())
+				: instructions.Add(CilOpCodes.Stind_Ref);
+		}
+
+		static CilInstruction AddTypeDefOrRef(CilInstructionCollection instructions, TypeDefOrRefSignature type)
+		{
+			// Check if the type is an enum
+			TypeSignature underlyingType = type.GetUnderlyingType();
+			return underlyingType is CorLibTypeSignature
+				? instructions.AddStoreIndirect(underlyingType)
+				: AddUnknown(instructions, underlyingType);
+		}
 	}
 
 	/// <summary>
