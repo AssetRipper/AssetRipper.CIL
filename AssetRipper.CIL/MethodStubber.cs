@@ -23,12 +23,12 @@ internal static class MethodStubber
 		{
 			if (methodDefinition.IsStatic)
 			{
-				methodInstructions.Add(CilOpCodes.Ldsfld, backingField);
+				methodInstructions.Add(CilOpCodes.Ldsfld, backingField.MakeGenericIfNecessary());
 			}
 			else
 			{
 				methodInstructions.Add(CilOpCodes.Ldarg_0);
-				methodInstructions.Add(CilOpCodes.Ldfld, backingField);
+				methodInstructions.Add(CilOpCodes.Ldfld, backingField.MakeGenericIfNecessary());
 			}
 			methodInstructions.Add(CilOpCodes.Ret);
 			return;
@@ -38,13 +38,13 @@ internal static class MethodStubber
 			if (methodDefinition.IsStatic)
 			{
 				methodInstructions.Add(CilOpCodes.Ldarg_0);
-				methodInstructions.Add(CilOpCodes.Stsfld, backingField);
+				methodInstructions.Add(CilOpCodes.Stsfld, backingField.MakeGenericIfNecessary());
 			}
 			else
 			{
 				methodInstructions.Add(CilOpCodes.Ldarg_0);
 				methodInstructions.Add(CilOpCodes.Ldarg_1);
-				methodInstructions.Add(CilOpCodes.Stfld, backingField);
+				methodInstructions.Add(CilOpCodes.Stfld, backingField.MakeGenericIfNecessary());
 			}
 			methodInstructions.Add(CilOpCodes.Ret);
 			return;
@@ -62,7 +62,7 @@ internal static class MethodStubber
 
 				methodInstructions.Add(CilOpCodes.Ldarg_0);
 				methodInstructions.AddDefaultValue(field.Signature.FieldType);
-				methodInstructions.Add(CilOpCodes.Stfld, field);
+				methodInstructions.Add(CilOpCodes.Stfld, field.MakeGenericIfNecessary());
 			}
 		}
 
@@ -180,5 +180,19 @@ internal static class MethodStubber
 	{
 		baseConstructor = TryGetBaseConstructor(methodDefinition);
 		return baseConstructor is not null;
+	}
+
+	private static IFieldDescriptor MakeGenericIfNecessary(this FieldDefinition field)
+	{
+		if (field.DeclaringType is null or { GenericParameters.Count: 0 })
+		{
+			return field;
+		}
+
+		TypeSignature[] typeArguments = Enumerable.Range(0, field.DeclaringType.GenericParameters.Count)
+			.Select(i => new GenericParameterSignature(field.Module, GenericParameterType.Type, i))
+			.ToArray();
+
+		return new MemberReference(field.DeclaringType.MakeGenericInstanceType(typeArguments).ToTypeDefOrRef(), field.Name, field.Signature);
 	}
 }
