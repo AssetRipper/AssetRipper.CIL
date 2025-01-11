@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssetRipper.CIL.Validator",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetRipper.CIL.Standardizer", "AssetRipper.CIL.Standardizer\AssetRipper.CIL.Standardizer.csproj", "{9E6D8580-5C3C-4AA8-89C9-34F475B79B24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetRipper.CIL.Stubber", "AssetRipper.CIL.Stubber\AssetRipper.CIL.Stubber.csproj", "{A35A3452-2211-4DF5-A5A5-406FDF1E1A76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{9E6D8580-5C3C-4AA8-89C9-34F475B79B24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E6D8580-5C3C-4AA8-89C9-34F475B79B24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E6D8580-5C3C-4AA8-89C9-34F475B79B24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A35A3452-2211-4DF5-A5A5-406FDF1E1A76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A35A3452-2211-4DF5-A5A5-406FDF1E1A76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A35A3452-2211-4DF5-A5A5-406FDF1E1A76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A35A3452-2211-4DF5-A5A5-406FDF1E1A76}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
