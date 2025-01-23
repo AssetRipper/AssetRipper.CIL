@@ -22,7 +22,7 @@ public static class CilInstructionCollectionExtensions
 		{
 			instructions.AddDefaultPrimitiveValue(corLibTypeSignature);
 		}
-		else if (type is ByReferenceTypeSignature)
+		else if (type is ByReferenceTypeSignature or PointerTypeSignature)
 		{
 			instructions.AddNullRef();
 		}
@@ -43,7 +43,7 @@ public static class CilInstructionCollectionExtensions
 		{
 			instructions.InitializeDefaultPrimitiveValue(corLibTypeSignature, localVariable);
 		}
-		else if (type is ByReferenceTypeSignature)
+		else if (type is ByReferenceTypeSignature or PointerTypeSignature)
 		{
 			instructions.AddNullRef();
 			instructions.Add(CilOpCodes.Stloc, localVariable);
