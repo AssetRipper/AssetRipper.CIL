@@ -6,9 +6,9 @@
 		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
 		<PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
 
-		<Version>1.1.4</Version>
+		<Version>1.1.5</Version>
 		<AssemblyVersion>$(Version)</AssemblyVersion>
-		<Copyright>Copyright (c) 2024 ds5678</Copyright>
+		<Copyright>Copyright (c) 2025 ds5678</Copyright>
 		<Authors>ds5678</Authors>
 		<Company>AssetRipper</Company>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
