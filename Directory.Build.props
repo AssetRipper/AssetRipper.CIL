@@ -2,11 +2,10 @@
 	<PropertyGroup>
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<IsAotCompatible>true</IsAotCompatible>
 		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
 		<PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
 
-		<Version>1.1.5</Version>
+		<Version>1.1.6</Version>
 		<AssemblyVersion>$(Version)</AssemblyVersion>
 		<Copyright>Copyright (c) 2025 ds5678</Copyright>
 		<Authors>ds5678</Authors>
