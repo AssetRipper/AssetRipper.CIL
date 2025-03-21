@@ -52,4 +52,33 @@ public static class VisibilityExtensions
 			Visibility.Internal => TypeAttributes.NotPublic,
 			_ => throw new ArgumentOutOfRangeException(nameof(visibility), visibility, null),
 		};
+
+	internal static Visibility GetVisibility(Type type)
+	{
+		if (type.IsPublic || type.IsNestedPublic)
+		{
+			return Visibility.Public;
+		}
+		if (type.IsNestedFamily)
+		{
+			return Visibility.Protected;
+		}
+		if (type.IsNotPublic || type.IsNestedAssembly)
+		{
+			return Visibility.Internal;
+		}
+		if (type.IsNestedFamORAssem)
+		{
+			return Visibility.ProtectedInternal;
+		}
+		if (type.IsNestedPrivate)
+		{
+			return Visibility.Private;
+		}
+		if (type.IsNestedFamANDAssem)
+		{
+			return Visibility.PrivateProtected;
+		}
+		throw new ArgumentException($"Unknown visibility for type {type}", nameof(type));
+	}
 }

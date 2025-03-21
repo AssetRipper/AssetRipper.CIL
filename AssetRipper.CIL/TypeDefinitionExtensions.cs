@@ -15,6 +15,25 @@ public static class TypeDefinitionExtensions
 		return field;
 	}
 
+	public static FieldDefinition AddConstantField(
+		this TypeDefinition type,
+		TypeSignature fieldType,
+		string fieldName,
+		Constant constant,
+		Visibility visibility = Visibility.Public)
+	{
+		FieldDefinition field = new FieldDefinition(
+			fieldName,
+			FieldAttributes.Static |
+			FieldAttributes.Literal |
+			FieldAttributes.HasDefault |
+			visibility.ToFieldAttributes(),
+			new FieldSignature(fieldType));
+		field.Constant = constant;
+		type.Fields.Add(field);
+		return field;
+	}
+
 	public static MethodDefinition AddMethod(this TypeDefinition type, string methodName, MethodAttributes methodAttributes, TypeSignature returnType)
 	{
 		MethodDefinition method = CreateMethod(methodName, methodAttributes, returnType);
@@ -26,6 +45,26 @@ public static class TypeDefinitionExtensions
 	{
 		MethodAttributes methodAttributes = visibility.ToMethodAttributes() | MethodAttributes.SpecialName | MethodAttributes.RuntimeSpecialName;
 		return type.AddMethod(".ctor", methodAttributes, type.Module!.CorLibTypeFactory.Void);
+	}
+
+	public static FieldDefinition AddEnumField(this TypeDefinition type, string name, long value)
+	{
+		TypeSignature underlyingType = type.GetEnumUnderlyingType() ?? throw new ArgumentException("Type is not an enum", nameof(type));
+
+		return type.AddConstantField(type.ToTypeSignature(), name, FromValue(value, underlyingType.ElementType));
+
+		static Constant FromValue(long value, ElementType elementType) => elementType switch
+		{
+			ElementType.I1 => Constant.FromValue((sbyte)value),
+			ElementType.U1 => Constant.FromValue((byte)value),
+			ElementType.I2 => Constant.FromValue((short)value),
+			ElementType.U2 => Constant.FromValue((ushort)value),
+			ElementType.I4 => Constant.FromValue((int)value),
+			ElementType.U4 => Constant.FromValue((uint)value),
+			ElementType.I8 => Constant.FromValue(value),
+			ElementType.U8 => Constant.FromValue(unchecked((ulong)value)),
+			_ => throw new ArgumentOutOfRangeException(nameof(elementType)),
+		};
 	}
 
 	private static MethodDefinition CreateMethod(string methodName, MethodAttributes methodAttributes, TypeSignature returnType)

@@ -27,6 +27,27 @@ public static class IHasCustomAttributeExtensions
 		return attribute;
 	}
 
+	internal static ModuleDefinition GetModule(this IHasCustomAttribute _this)
+	{
+		return (_this as IModuleProvider)?.Module ?? throw new ArgumentException("Entity does not have a module", nameof(_this));
+	}
+
+	public static CustomAttribute AddFlagsAttribute(this IHasCustomAttribute _this)
+	{
+		ModuleDefinition module = _this.GetModule();
+
+		if (module.TryGetTopLevelType("System", nameof(FlagsAttribute), out TypeDefinition? flagsType))
+		{
+			return _this.AddCustomAttribute(flagsType.GetDefaultConstructor());
+		}
+		else
+		{
+			TypeReference flagsTypeRef = new(module.CorLibTypeFactory.CorLibScope, "System", nameof(FlagsAttribute));
+			MemberReference constructor = new(flagsTypeRef, ".ctor", MethodSignature.CreateInstance(module.CorLibTypeFactory.Void));
+			return _this.AddCustomAttribute(constructor);
+		}
+	}
+
 	/// <summary>
 	/// Applies the <see cref="CompilerGeneratedAttribute"/>
 	/// </summary>
@@ -34,7 +55,7 @@ public static class IHasCustomAttributeExtensions
 	/// <returns>The resulting custom attribute</returns>
 	public static CustomAttribute AddCompilerGeneratedAttribute(this IHasCustomAttribute _this)
 	{
-		ModuleDefinition module = (_this as IModuleProvider)?.Module ?? throw new ArgumentException("Entity does not have a module", nameof(_this));
+		ModuleDefinition module = _this.GetModule();
 
 		if (module.TryGetTopLevelType("System.Runtime.CompilerServices", nameof(CompilerGeneratedAttribute), out TypeDefinition? compilerGeneratedType))
 		{
