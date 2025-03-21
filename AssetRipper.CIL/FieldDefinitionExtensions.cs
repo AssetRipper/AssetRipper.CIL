@@ -57,4 +57,9 @@ public static class FieldDefinitionExtensions
 			return false;
 		}
 	}
+
+	public static bool IsFixedBuffer(this FieldDefinition field)
+	{
+		return field.HasCustomAttribute("System.Runtime.CompilerServices", "FixedBufferAttribute");
+	}
 }

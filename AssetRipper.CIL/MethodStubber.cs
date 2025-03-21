@@ -55,7 +55,7 @@ internal static class MethodStubber
 			TypeDefinition declaringType = methodDefinition.DeclaringType!;
 			foreach (FieldDefinition field in declaringType.Fields)
 			{
-				if (field.IsStatic || field.Signature is null)
+				if (field.IsStatic || field.Signature is null || field.IsFixedBuffer())
 				{
 					continue;
 				}
