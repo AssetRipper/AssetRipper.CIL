@@ -25,7 +25,7 @@ public static class ModuleDefinitionExtensions
 			?? throw new ArgumentOutOfRangeException(nameof(underlyingType), underlyingType, null);
 
 		TypeReference baseType = new(module.CorLibTypeFactory.CorLibScope, "System", "Enum");
-		TypeDefinition type = new(@namespace, name, visibility.ToTypeAttributes() | TypeAttributes.Sealed, baseType);
+		TypeDefinition type = new(@namespace, name, visibility.ToTypeAttributes() | TypeAttributes.Sealed, module.DefaultImporter.ImportType(baseType));
 		module.TopLevelTypes.Add(type);
 		AddEnumValue(type, underlyingTypeSignature);
 		return type;

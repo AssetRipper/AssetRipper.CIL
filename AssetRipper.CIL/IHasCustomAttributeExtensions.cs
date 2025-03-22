@@ -44,7 +44,7 @@ public static class IHasCustomAttributeExtensions
 		{
 			TypeReference flagsTypeRef = new(module.CorLibTypeFactory.CorLibScope, "System", nameof(FlagsAttribute));
 			MemberReference constructor = new(flagsTypeRef, ".ctor", MethodSignature.CreateInstance(module.CorLibTypeFactory.Void));
-			return _this.AddCustomAttribute(constructor);
+			return _this.AddCustomAttribute(module.DefaultImporter.ImportMethod(constructor));
 		}
 	}
 
@@ -69,7 +69,7 @@ public static class IHasCustomAttributeExtensions
 
 			MemberReference constructor = new(compilerGeneratedTypeRef, ".ctor", MethodSignature.CreateInstance(module.CorLibTypeFactory.Void));
 
-			return _this.AddCustomAttribute(constructor);
+			return _this.AddCustomAttribute(module.DefaultImporter.ImportMethod(constructor));
 		}
 
 		static AssemblyReference GetOrAddReferenceToSystemRuntimeCompilerServices(ModuleDefinition module)
