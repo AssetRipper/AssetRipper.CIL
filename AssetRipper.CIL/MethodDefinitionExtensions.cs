@@ -1,6 +1,8 @@
 ﻿using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using System.Diagnostics.CodeAnalysis;
 
@@ -21,6 +23,25 @@ public static class MethodDefinitionExtensions
 	public static void ReplaceMethodBodyWithMinimalImplementation(this MethodDefinition methodDefinition)
 	{
 		MethodStubber.FillMethodBodyWithStub(methodDefinition);
+	}
+
+	/// <summary>
+	/// Replaces the method body with: <code>throw null;</code>
+	/// </summary>
+	/// <remarks>
+	/// If the method is not managed or should not have a body, this method does nothing.
+	/// </remarks>
+	/// <param name="methodDefinition">The method to modify.</param>
+	public static void ReplaceMethodBodyWithThrowNull(this MethodDefinition methodDefinition)
+	{
+		if (!methodDefinition.IsManagedMethodWithBody())
+		{
+			return;
+		}
+		methodDefinition.CilMethodBody = new(methodDefinition);
+		CilInstructionCollection methodInstructions = methodDefinition.CilMethodBody.Instructions;
+		methodInstructions.Add(CilOpCodes.Ldnull);
+		methodInstructions.Add(CilOpCodes.Throw);
 	}
 
 	public static bool IsInstance(this MethodDefinition methodDefinition)
