@@ -165,14 +165,7 @@ internal static class MethodStubber
 
 		static MethodDefinition? GetFirstCompatibleConstructor(TypeDefinition declaringType, TypeDefinition baseType)
 		{
-			if (declaringType.Module == baseType.Module)
-			{
-				return baseType.Methods.FirstOrDefault(m => m.IsInstanceConstructor() && !m.IsPrivate);
-			}
-			else
-			{
-				return baseType.Methods.FirstOrDefault(m => m.IsInstanceConstructor() && (m.IsFamily || m.IsPublic));
-			}
+			return baseType.Methods.FirstOrDefault(m => m.IsInstanceConstructor() && m.IsAccessibleFromType(declaringType));
 		}
 	}
 
