@@ -16,7 +16,7 @@ internal static class MethodStubber
 			return;
 		}
 
-		methodDefinition.CilMethodBody = new(methodDefinition);
+		methodDefinition.CilMethodBody = new();
 		CilInstructionCollection methodInstructions = methodDefinition.CilMethodBody.Instructions;
 
 		if (methodDefinition.IsAutoPropertyGetMethod(out FieldDefinition? backingField))
@@ -131,13 +131,13 @@ internal static class MethodStubber
 				return null;
 			}
 			MethodDefinition? baseConstructor = GetFirstCompatibleConstructor(methodDefinition.DeclaringType, baseTypeResolved);
-			if (baseConstructor is null || methodDefinition.DeclaringType.Module is null)
+			if (baseConstructor is null || methodDefinition.DeclaringType.DeclaringModule is null)
 			{
 				return null;
 			}
 			else
 			{
-				return methodDefinition.DeclaringType.Module.DefaultImporter.ImportMethod(baseConstructor);
+				return methodDefinition.DeclaringType.DeclaringModule.DefaultImporter.ImportMethod(baseConstructor);
 			}
 		}
 		else if (baseType is TypeSpecification baseTypeSpec)
@@ -153,11 +153,11 @@ internal static class MethodStubber
 				return null;
 			}
 			MethodDefinition? baseConstructor = GetFirstCompatibleConstructor(methodDefinition.DeclaringType, baseTypeResolved);
-			if (baseConstructor is null || methodDefinition.DeclaringType.Module is null)
+			if (baseConstructor is null || methodDefinition.DeclaringType.DeclaringModule is null)
 			{
 				return null;
 			}
-			IMethodDefOrRef baseConstructorImported = methodDefinition.DeclaringType.Module.DefaultImporter.ImportMethod(baseConstructor);
+			IMethodDefOrRef baseConstructorImported = methodDefinition.DeclaringType.DeclaringModule.DefaultImporter.ImportMethod(baseConstructor);
 			return new MemberReference(baseType, baseConstructorImported.Name, baseConstructorImported.Signature);
 		}
 
@@ -183,7 +183,7 @@ internal static class MethodStubber
 		}
 
 		TypeSignature[] typeArguments = Enumerable.Range(0, field.DeclaringType.GenericParameters.Count)
-			.Select(i => new GenericParameterSignature(field.Module, GenericParameterType.Type, i))
+			.Select(i => new GenericParameterSignature(field.DeclaringModule, GenericParameterType.Type, i))
 			.ToArray();
 
 		return new MemberReference(field.DeclaringType.MakeGenericInstanceType(typeArguments).ToTypeDefOrRef(), field.Name, field.Signature);

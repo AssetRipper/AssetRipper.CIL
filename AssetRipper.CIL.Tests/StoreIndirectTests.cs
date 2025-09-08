@@ -94,7 +94,7 @@ public class StoreIndirectTests
 	private static void AssertCorrectStoreIndirect(TypeSignature typeToStore, CilCode expectedOpCode)
 	{
 		MethodDefinition method = new MethodDefinition("Test", MethodAttributes.Public | MethodAttributes.Static, null);
-		method.CilMethodBody = new(method);
+		method.CilMethodBody = new();
 		CilInstructionCollection instructions = method.CilMethodBody.Instructions;
 		instructions.AddStoreIndirect(typeToStore);
 		Assert.That(instructions, Has.Count.EqualTo(1));

@@ -11,7 +11,7 @@ public sealed class SwitchRemover : ICilManipulator
 {
 	public void Execute(CilManipulationContext context)
 	{
-		ModuleDefinition? module = context.Instructions.Owner.Owner.Module;
+		ModuleDefinition? module = context.Instructions.Owner.Owner?.DeclaringModule;
 		if (module is null)
 		{
 			return;

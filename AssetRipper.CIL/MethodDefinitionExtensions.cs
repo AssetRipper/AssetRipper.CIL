@@ -38,7 +38,7 @@ public static class MethodDefinitionExtensions
 		{
 			return;
 		}
-		methodDefinition.CilMethodBody = new(methodDefinition);
+		methodDefinition.CilMethodBody = new();
 		CilInstructionCollection methodInstructions = methodDefinition.CilMethodBody.Instructions;
 		methodInstructions.Add(CilOpCodes.Ldnull);
 		methodInstructions.Add(CilOpCodes.Throw);

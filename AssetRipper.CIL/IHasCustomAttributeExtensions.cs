@@ -29,7 +29,7 @@ public static class IHasCustomAttributeExtensions
 
 	internal static ModuleDefinition GetModule(this IHasCustomAttribute _this)
 	{
-		return (_this as IModuleProvider)?.Module ?? throw new ArgumentException("Entity does not have a module", nameof(_this));
+		return (_this as IModuleProvider)?.ContextModule ?? throw new ArgumentException("Entity does not have a module", nameof(_this));
 	}
 
 	public static CustomAttribute AddFlagsAttribute(this IHasCustomAttribute _this)

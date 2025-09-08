@@ -94,7 +94,7 @@ public class LoadIndirectTests
 	private static void AssertCorrectLoadIndirect(TypeSignature typeToLoad, CilCode expectedOpCode)
 	{
 		MethodDefinition method = new MethodDefinition("Test", MethodAttributes.Public | MethodAttributes.Static, null);
-		method.CilMethodBody = new(method);
+		method.CilMethodBody = new();
 		CilInstructionCollection instructions = method.CilMethodBody.Instructions;
 		instructions.AddLoadIndirect(typeToLoad);
 		Assert.That(instructions, Has.Count.EqualTo(1));

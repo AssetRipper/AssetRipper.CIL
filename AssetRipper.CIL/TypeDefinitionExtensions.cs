@@ -44,7 +44,7 @@ public static class TypeDefinitionExtensions
 	public static MethodDefinition AddConstructor(this TypeDefinition type, Visibility visibility = Visibility.Public)
 	{
 		MethodAttributes methodAttributes = visibility.ToMethodAttributes() | MethodAttributes.SpecialName | MethodAttributes.RuntimeSpecialName;
-		return type.AddMethod(".ctor", methodAttributes, type.Module!.CorLibTypeFactory.Void);
+		return type.AddMethod(".ctor", methodAttributes, type.DeclaringModule!.CorLibTypeFactory.Void);
 	}
 
 	public static FieldDefinition AddEnumField(this TypeDefinition type, string name, long value)
@@ -75,7 +75,7 @@ public static class TypeDefinitionExtensions
 			: MethodSignature.CreateInstance(returnType);
 		MethodDefinition result = new MethodDefinition(methodName, methodAttributes, methodSignature);
 
-		result.CilMethodBody = new CilMethodBody(result);
+		result.CilMethodBody = new CilMethodBody();
 
 		return result;
 	}
