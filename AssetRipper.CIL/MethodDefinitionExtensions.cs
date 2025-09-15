@@ -93,6 +93,11 @@ public static class MethodDefinitionExtensions
 			&& !managedMethod.IsRuntime;
 	}
 
+	public static CilInstructionCollection GetInstructions(this MethodDefinition method)
+	{
+		return method.CilMethodBody?.Instructions ?? throw new ArgumentException("CilMethodBody was null", nameof(method));
+	}
+
 	public static bool IsAutoPropertyGetMethod(this MethodDefinition method, [NotNullWhen(true)] out FieldDefinition? backingField)
 	{
 		if (!method.IsGetMethod
@@ -152,12 +157,12 @@ public static class MethodDefinitionExtensions
 		}
 	}
 
-	public static Parameter AddParameter(this MethodDefinition method, TypeSignature parameterSignature, string parameterName)
+	public static Parameter AddParameter(this MethodDefinition method, TypeSignature parameterSignature, string? parameterName)
 	{
 		return method.AddParameter(parameterSignature, parameterName, out _);
 	}
 
-	public static Parameter AddParameter(this MethodDefinition method, TypeSignature parameterSignature, string parameterName, out ParameterDefinition parameterDefinition)
+	public static Parameter AddParameter(this MethodDefinition method, TypeSignature parameterSignature, string? parameterName, out ParameterDefinition parameterDefinition)
 	{
 		parameterDefinition = new ParameterDefinition((ushort)(method.Signature!.ParameterTypes.Count + 1), parameterName, default);
 		method.Signature.ParameterTypes.Add(parameterSignature);

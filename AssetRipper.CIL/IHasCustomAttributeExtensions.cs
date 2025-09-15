@@ -27,6 +27,23 @@ public static class IHasCustomAttributeExtensions
 		return attribute;
 	}
 
+	public static CustomAttribute AddCustomAttribute<T>(this IHasCustomAttribute _this, IMethodDefOrRef constructor, SzArrayTypeSignature paramType, T[] paramValue)
+	{
+		CustomAttribute attribute = _this.AddCustomAttribute(constructor);
+		attribute.AddFixedArgument(paramType, paramValue);
+		return attribute;
+	}
+
+	public static CustomAttribute AddCustomAttribute(this IHasCustomAttribute _this, IMethodDefOrRef constructor, params (TypeSignature, object)[] parameters)
+	{
+		CustomAttribute attribute = _this.AddCustomAttribute(constructor);
+		for (int i = 0; i < parameters.Length; i++)
+		{
+			attribute.AddFixedArgument(parameters[i].Item1, parameters[i].Item2);
+		}
+		return attribute;
+	}
+
 	internal static ModuleDefinition GetModule(this IHasCustomAttribute _this)
 	{
 		return (_this as IModuleProvider)?.ContextModule ?? throw new ArgumentException("Entity does not have a module", nameof(_this));

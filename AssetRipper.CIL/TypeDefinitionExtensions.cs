@@ -7,7 +7,7 @@ namespace AssetRipper.CIL;
 
 public static class TypeDefinitionExtensions
 {
-	public static FieldDefinition AddField(this TypeDefinition type, string fieldName, TypeSignature fieldType, bool isStatic = false, Visibility visibility = Visibility.Public)
+	public static FieldDefinition AddField(this TypeDefinition type, string? fieldName, TypeSignature fieldType, bool isStatic = false, Visibility visibility = Visibility.Public)
 	{
 		FieldAttributes fieldAttributes = visibility.ToFieldAttributes() | (isStatic ? FieldAttributes.Static : default);
 		FieldDefinition field = new FieldDefinition(fieldName, fieldAttributes, fieldType);
@@ -34,7 +34,7 @@ public static class TypeDefinitionExtensions
 		return field;
 	}
 
-	public static MethodDefinition AddMethod(this TypeDefinition type, string methodName, MethodAttributes methodAttributes, TypeSignature returnType)
+	public static MethodDefinition AddMethod(this TypeDefinition type, string? methodName, MethodAttributes methodAttributes, TypeSignature returnType)
 	{
 		MethodDefinition method = CreateMethod(methodName, methodAttributes, returnType);
 		type.Methods.Add(method);
@@ -67,7 +67,7 @@ public static class TypeDefinitionExtensions
 		};
 	}
 
-	private static MethodDefinition CreateMethod(string methodName, MethodAttributes methodAttributes, TypeSignature returnType)
+	private static MethodDefinition CreateMethod(string? methodName, MethodAttributes methodAttributes, TypeSignature returnType)
 	{
 		bool isStatic = (methodAttributes & MethodAttributes.Static) != 0;
 		MethodSignature methodSignature = isStatic
@@ -80,12 +80,25 @@ public static class TypeDefinitionExtensions
 		return result;
 	}
 
+	/// <summary>
+	/// Gets the default constructor for a <see cref="TypeDefinition"/>. Throws an exception if one doesn't exist.
+	/// </summary>
 	public static MethodDefinition GetDefaultConstructor(this TypeDefinition type)
 	{
 		return type.Methods.First(m => m.IsInstanceConstructor() && m.Parameters.Count == 0);
 	}
 
-	public static bool IsStaticClass(this TypeDefinition type)
+	/// <summary>
+	/// Get all the instance constructors for a type
+	/// </summary>
+	/// <param name="type">The definition for the type</param>
+	/// <returns>All the instance constructors</returns>
+	public static IEnumerable<MethodDefinition> GetInstanceConstructors(this TypeDefinition type)
+	{
+		return type.Methods.Where(m => !m.IsStatic && m.IsConstructor);
+	}
+
+	public static bool IsStatic(this TypeDefinition type)
 	{
 		return type.IsSealed && type.IsAbstract;
 	}
