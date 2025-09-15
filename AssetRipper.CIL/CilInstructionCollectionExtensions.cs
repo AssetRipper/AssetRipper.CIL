@@ -71,6 +71,12 @@ public static class CilInstructionCollectionExtensions
 		instructions.Add(CilOpCodes.Ceq);
 	}
 
+	public static void AddThrowNull(this CilInstructionCollection instructions)
+	{
+		instructions.Add(CilOpCodes.Ldnull);
+		instructions.Add(CilOpCodes.Throw);
+	}
+
 	public static CilInstruction AddLoadElement(this CilInstructionCollection instructions, TypeSignature elementType)
 	{
 		return elementType switch

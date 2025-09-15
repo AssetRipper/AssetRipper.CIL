@@ -40,8 +40,7 @@ public static class MethodDefinitionExtensions
 		}
 		methodDefinition.CilMethodBody = new();
 		CilInstructionCollection methodInstructions = methodDefinition.CilMethodBody.Instructions;
-		methodInstructions.Add(CilOpCodes.Ldnull);
-		methodInstructions.Add(CilOpCodes.Throw);
+		methodInstructions.AddThrowNull();
 	}
 
 	public static bool IsInstance(this MethodDefinition methodDefinition)
