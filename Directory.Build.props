@@ -5,8 +5,7 @@
 		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
 		<PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
 
-		<Version>1.2.1</Version>
-		<AssemblyVersion>$(Version)</AssemblyVersion>
+		<VersionPrefix>1.2.2</VersionPrefix>
 		<Copyright>Copyright (c) 2025 ds5678</Copyright>
 		<Authors>ds5678</Authors>
 		<Company>AssetRipper</Company>
