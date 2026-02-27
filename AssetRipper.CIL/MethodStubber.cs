@@ -187,9 +187,12 @@ internal static class MethodStubber
 			return field;
 		}
 
-		TypeSignature[] typeArguments = Enumerable.Range(0, field.DeclaringType.GenericParameters.Count)
-			.Select(i => new GenericParameterSignature(field.DeclaringModule, GenericParameterType.Type, i))
-			.ToArray();
+		int count = field.DeclaringType.GenericParameters.Count;
+		TypeSignature[] typeArguments = new TypeSignature[count];
+		for (int i = 0; i < count; i++)
+		{
+			typeArguments[i] = new GenericParameterSignature(field.DeclaringModule, GenericParameterType.Type, i);
+		}
 
 		return new MemberReference(field.DeclaringType.MakeGenericInstanceType(field.DeclaringModule?.RuntimeContext, typeArguments).ToTypeDefOrRef(), field.Name, field.Signature);
 	}
