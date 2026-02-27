@@ -35,12 +35,19 @@ public static class EventDefinitionExtensions
 
 	public static bool HasBackingField(this EventDefinition eventDefinition, [NotNullWhen(true)] out FieldDefinition? backingField)
 	{
-		TypeSignature? eventType = eventDefinition.EventType?.ToTypeSignature();
+		RuntimeContext? runtimeContext = eventDefinition.DeclaringModule?.RuntimeContext;
+		if (runtimeContext is null)
+		{
+			backingField = null;
+			return false;
+		}
+
+		TypeSignature? eventType = eventDefinition.EventType?.ToTypeSignature(runtimeContext);
 		if (eventType is not null)
 		{
 			foreach (FieldDefinition field in eventDefinition.DeclaringType?.Fields ?? [])
 			{
-				if (field.IsPrivate && field.Name == eventDefinition.Name && SignatureComparer.Default.Equals(field.Signature?.FieldType, eventType))
+				if (field.IsPrivate && field.Name == eventDefinition.Name && runtimeContext.SignatureComparer.Equals(field.Signature?.FieldType, eventType))
 				{
 					backingField = field;
 					return true;

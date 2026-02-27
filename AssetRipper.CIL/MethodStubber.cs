@@ -118,6 +118,11 @@ internal static class MethodStubber
 		{
 			return null;
 		}
+		RuntimeContext? runtimeContext = methodDefinition.DeclaringModule?.RuntimeContext;
+		if (runtimeContext is null)
+		{
+			return null;
+		}
 
 		if (baseType is TypeDefinition baseTypeDef)
 		{
@@ -125,8 +130,8 @@ internal static class MethodStubber
 		}
 		else if (baseType is TypeReference baseTypeRef)
 		{
-			TypeDefinition? baseTypeResolved = baseTypeRef.Resolve();
-			if (baseTypeResolved is null)
+			ResolutionStatus resolutionStatus = baseTypeRef.Resolve(runtimeContext, out TypeDefinition? baseTypeResolved);
+			if (baseTypeResolved is null || resolutionStatus is not ResolutionStatus.Success)
 			{
 				return null;
 			}
@@ -147,8 +152,8 @@ internal static class MethodStubber
 			{
 				return null;
 			}
-			TypeDefinition? baseTypeResolved = genericInstanceTypeSignature.GenericType.Resolve();
-			if (baseTypeResolved is null)
+			ResolutionStatus resolutionStatus = genericInstanceTypeSignature.GenericType.Resolve(runtimeContext, out TypeDefinition? baseTypeResolved);
+			if (baseTypeResolved is null || resolutionStatus is not ResolutionStatus.Success)
 			{
 				return null;
 			}
@@ -165,7 +170,7 @@ internal static class MethodStubber
 
 		static MethodDefinition? GetFirstCompatibleConstructor(TypeDefinition declaringType, TypeDefinition baseType)
 		{
-			return baseType.Methods.FirstOrDefault(m => m.IsInstanceConstructor() && m.IsAccessibleFromType(declaringType));
+			return baseType.Methods.FirstOrDefault(m => m.IsInstanceConstructor() && m.IsAccessibleFromType(declaringType, m.DeclaringModule?.RuntimeContext));
 		}
 	}
 
@@ -186,6 +191,6 @@ internal static class MethodStubber
 			.Select(i => new GenericParameterSignature(field.DeclaringModule, GenericParameterType.Type, i))
 			.ToArray();
 
-		return new MemberReference(field.DeclaringType.MakeGenericInstanceType(typeArguments).ToTypeDefOrRef(), field.Name, field.Signature);
+		return new MemberReference(field.DeclaringType.MakeGenericInstanceType(field.DeclaringModule?.RuntimeContext, typeArguments).ToTypeDefOrRef(), field.Name, field.Signature);
 	}
 }

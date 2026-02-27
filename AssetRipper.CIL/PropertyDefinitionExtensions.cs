@@ -13,7 +13,8 @@ public static class PropertyDefinitionExtensions
 		if (backingField is null
 			|| !backingField.IsPrivate
 			|| backingField.IsStatic != property.IsStatic()
-			|| !SignatureComparer.Default.Equals(backingField.Signature?.FieldType, property.Signature?.ReturnType))
+			|| backingField.DeclaringModule?.RuntimeContext is not { } runtimeContext
+			|| !runtimeContext.SignatureComparer.Equals(backingField.Signature?.FieldType, property.Signature?.ReturnType))
 		{
 			backingField = null;
 			return false;

@@ -114,7 +114,8 @@ public static class MethodDefinitionExtensions
 		if (field is null
 			|| !field.IsPrivate
 			|| field.IsStatic != method.IsStatic
-			|| !SignatureComparer.Default.Equals(field.Signature?.FieldType, method.Signature?.ReturnType))
+			|| method.DeclaringModule?.RuntimeContext is not { } runtimeContext
+			|| !runtimeContext.SignatureComparer.Equals(field.Signature?.FieldType, method.Signature?.ReturnType))
 		{
 			backingField = null;
 			return false;
@@ -144,7 +145,8 @@ public static class MethodDefinitionExtensions
 		if (field is null
 			|| !field.IsPrivate
 			|| field.IsStatic != method.IsStatic
-			|| !SignatureComparer.Default.Equals(field.Signature?.FieldType, method.Parameters[0].ParameterType))
+			|| method.DeclaringModule?.RuntimeContext is not { } runtimeContext
+			|| !runtimeContext.SignatureComparer.Equals(field.Signature?.FieldType, method.Parameters[0].ParameterType))
 		{
 			backingField = null;
 			return false;

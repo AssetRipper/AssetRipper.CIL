@@ -160,7 +160,7 @@ public static class CilInstructionCollectionExtensions
 		static CilInstruction AddTypeDefOrRef(CilInstructionCollection instructions, TypeDefOrRefSignature type)
 		{
 			// Check if the type is an enum
-			TypeSignature underlyingType = type.GetUnderlyingType();
+			TypeSignature underlyingType = type.GetUnderlyingType(instructions.Owner.Owner?.DeclaringModule?.RuntimeContext);
 			return underlyingType is CorLibTypeSignature
 				? instructions.AddLoadIndirect(underlyingType)
 				: AddUnknown(instructions, underlyingType);
@@ -202,7 +202,7 @@ public static class CilInstructionCollectionExtensions
 		static CilInstruction AddTypeDefOrRef(CilInstructionCollection instructions, TypeDefOrRefSignature type)
 		{
 			// Check if the type is an enum
-			TypeSignature underlyingType = type.GetUnderlyingType();
+			TypeSignature underlyingType = type.GetUnderlyingType(instructions.Owner.Owner?.DeclaringModule?.RuntimeContext);
 			return underlyingType is CorLibTypeSignature
 				? instructions.AddStoreIndirect(underlyingType)
 				: AddUnknown(instructions, underlyingType);

@@ -33,7 +33,8 @@ public static class FieldDefinitionExtensions
 			property = field.DeclaringType?.Properties.FirstOrDefault(p => p.Name == propertyName);
 			return property is not null
 				&& field.IsStatic == property.IsStatic()
-				&& SignatureComparer.Default.Equals(field.Signature?.FieldType, property.Signature?.ReturnType);
+				&& field.DeclaringModule?.RuntimeContext is { } runtimeContext
+				&& runtimeContext.SignatureComparer.Equals(field.Signature?.FieldType, property.Signature?.ReturnType);
 		}
 		else
 		{
@@ -49,7 +50,8 @@ public static class FieldDefinitionExtensions
 			@event = field.DeclaringType?.Events.FirstOrDefault(e => e.Name == field.Name);
 			return @event is not null
 				&& field.IsStatic == @event.IsStatic()
-				&& SignatureComparer.Default.Equals(@event.EventType?.ToTypeSignature(), field.Signature?.FieldType);
+				&& @event.DeclaringModule?.RuntimeContext is { } runtimeContext
+				&& runtimeContext.SignatureComparer.Equals(@event.EventType?.ToTypeSignature(runtimeContext), field.Signature?.FieldType);
 		}
 		else
 		{
