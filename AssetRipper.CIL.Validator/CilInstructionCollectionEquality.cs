@@ -37,7 +37,7 @@ public static class CilInstructionCollectionEquality
 		}
 
 		// Instructions
-		return Equals(left.Instructions, right.Instructions); 
+		return Equals(left.Instructions, right.Instructions);
 	}
 
 	public static bool Equals(CilExceptionHandler left, CilExceptionHandler right)
