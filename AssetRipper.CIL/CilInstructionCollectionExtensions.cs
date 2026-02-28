@@ -94,11 +94,16 @@ public static class CilInstructionCollectionExtensions
 				ElementType.U8 => instructions.Add(CilOpCodes.Ldelem_I8),
 				ElementType.R4 => instructions.Add(CilOpCodes.Ldelem_R4),
 				ElementType.R8 => instructions.Add(CilOpCodes.Ldelem_R8),
-				_ => elementType.IsValueType ? instructions.Add(CilOpCodes.Ldelem) : instructions.Add(CilOpCodes.Ldelem_Ref)
+				_ => AddUnknown(instructions, elementType)
 			},
-			GenericParameterSignature => instructions.Add(CilOpCodes.Ldelem),
-			_ => elementType.IsValueType ? instructions.Add(CilOpCodes.Ldelem) : instructions.Add(CilOpCodes.Ldelem_Ref)
+			GenericParameterSignature => instructions.Add(CilOpCodes.Ldelem, elementType.ToTypeDefOrRef()),
+			_ => AddUnknown(instructions, elementType)
 		};
+
+		static CilInstruction AddUnknown(CilInstructionCollection instructions, TypeSignature elementType)
+		{
+			return elementType.IsValueType ? instructions.Add(CilOpCodes.Ldelem, elementType.ToTypeDefOrRef()) : instructions.Add(CilOpCodes.Ldelem_Ref);
+		}
 	}
 
 	public static CilInstruction AddStoreElement(this CilInstructionCollection instructions, TypeSignature elementType)
@@ -118,11 +123,18 @@ public static class CilInstructionCollectionExtensions
 				ElementType.U8 => instructions.Add(CilOpCodes.Stelem_I8),
 				ElementType.R4 => instructions.Add(CilOpCodes.Stelem_R4),
 				ElementType.R8 => instructions.Add(CilOpCodes.Stelem_R8),
-				_ => instructions.Add(CilOpCodes.Stelem_Ref),
+				_ => AddUnknown(instructions, elementType)
 			},
-			GenericParameterSignature => instructions.Add(CilOpCodes.Stelem),
-			_ => elementType.IsValueType ? instructions.Add(CilOpCodes.Stelem) : instructions.Add(CilOpCodes.Stelem_Ref)
+			GenericParameterSignature => instructions.Add(CilOpCodes.Stelem, elementType.ToTypeDefOrRef()),
+			_ => AddUnknown(instructions, elementType)
 		};
+
+		static CilInstruction AddUnknown(CilInstructionCollection instructions, TypeSignature elementType)
+		{
+			return elementType.IsValueType
+				? instructions.Add(CilOpCodes.Stelem, elementType.ToTypeDefOrRef())
+				: instructions.Add(CilOpCodes.Stelem_Ref);
+		}
 	}
 
 	public static CilInstruction AddLoadIndirect(this CilInstructionCollection instructions, TypeSignature type)
