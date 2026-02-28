@@ -3,6 +3,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace AssetRipper.CIL;
@@ -26,6 +27,10 @@ public static class CilInstructionCollectionExtensions
 		{
 			instructions.AddNullRef();
 		}
+		else if (type is TypeDefOrRefSignature t && TryGetEnumUnderlyingType(instructions, t, out CorLibTypeSignature? underlyingType))
+		{
+			instructions.AddDefaultPrimitiveValue(underlyingType);
+		}
 		else if (type.IsValueTypeOrGenericParameter())
 		{
 			instructions.AddDefaultValueForUnknownType(type);
@@ -47,6 +52,10 @@ public static class CilInstructionCollectionExtensions
 		{
 			instructions.AddNullRef();
 			instructions.Add(CilOpCodes.Stloc, localVariable);
+		}
+		else if (type is TypeDefOrRefSignature t && TryGetEnumUnderlyingType(instructions, t, out CorLibTypeSignature? underlyingType))
+		{
+			instructions.InitializeDefaultPrimitiveValue(underlyingType, localVariable);
 		}
 		else if (type.IsValueTypeOrGenericParameter())
 		{
@@ -100,6 +109,9 @@ public static class CilInstructionCollectionExtensions
 			},
 			GenericParameterSignature => instructions.Add(CilOpCodes.Ldelem, elementType.ToTypeDefOrRef()),
 			PointerTypeSignature => instructions.Add(CilOpCodes.Ldelem_I),
+			TypeDefOrRefSignature t => TryGetEnumUnderlyingType(instructions, t, out CorLibTypeSignature? underlyingType)
+				? instructions.AddLoadElement(underlyingType)
+				: AddUnknown(instructions, t),
 			_ => AddUnknown(instructions, elementType)
 		};
 
@@ -134,6 +146,9 @@ public static class CilInstructionCollectionExtensions
 			},
 			GenericParameterSignature => instructions.Add(CilOpCodes.Stelem, elementType.ToTypeDefOrRef()),
 			PointerTypeSignature => instructions.Add(CilOpCodes.Stelem_I),
+			TypeDefOrRefSignature t => TryGetEnumUnderlyingType(instructions, t, out CorLibTypeSignature? underlyingType)
+				? instructions.AddStoreElement(underlyingType)
+				: AddUnknown(instructions, t),
 			_ => AddUnknown(instructions, elementType)
 		};
 
@@ -166,7 +181,9 @@ public static class CilInstructionCollectionExtensions
 			},
 			PointerTypeSignature => instructions.Add(CilOpCodes.Ldind_I),
 			GenericParameterSignature => instructions.Add(CilOpCodes.Ldobj, type.ToTypeDefOrRef()),
-			TypeDefOrRefSignature t => AddTypeDefOrRef(instructions, t),
+			TypeDefOrRefSignature t => TryGetEnumUnderlyingType(instructions, t, out CorLibTypeSignature? underlyingType)
+				? instructions.AddLoadIndirect(underlyingType)
+				: AddUnknown(instructions, type),
 			_ => AddUnknown(instructions, type),
 		};
 
@@ -175,15 +192,6 @@ public static class CilInstructionCollectionExtensions
 			return type.IsValueType
 				? instructions.Add(CilOpCodes.Ldobj, type.ToTypeDefOrRef())
 				: instructions.Add(CilOpCodes.Ldind_Ref);
-		}
-
-		static CilInstruction AddTypeDefOrRef(CilInstructionCollection instructions, TypeDefOrRefSignature type)
-		{
-			// Check if the type is an enum
-			TypeSignature underlyingType = type.GetUnderlyingType(instructions.Owner.Owner?.DeclaringModule?.RuntimeContext);
-			return underlyingType is CorLibTypeSignature
-				? instructions.AddLoadIndirect(underlyingType)
-				: AddUnknown(instructions, underlyingType);
 		}
 	}
 
@@ -208,7 +216,9 @@ public static class CilInstructionCollectionExtensions
 			},
 			PointerTypeSignature => instructions.Add(CilOpCodes.Stind_I),
 			GenericParameterSignature => instructions.Add(CilOpCodes.Stobj, type.ToTypeDefOrRef()),
-			TypeDefOrRefSignature t => AddTypeDefOrRef(instructions, t),
+			TypeDefOrRefSignature t => TryGetEnumUnderlyingType(instructions, t, out CorLibTypeSignature? underlyingType)
+				? instructions.AddStoreIndirect(underlyingType)
+				: AddUnknown(instructions, t),
 			_ => AddUnknown(instructions, type),
 		};
 
@@ -217,15 +227,6 @@ public static class CilInstructionCollectionExtensions
 			return type.IsValueType
 				? instructions.Add(CilOpCodes.Stobj, type.ToTypeDefOrRef())
 				: instructions.Add(CilOpCodes.Stind_Ref);
-		}
-
-		static CilInstruction AddTypeDefOrRef(CilInstructionCollection instructions, TypeDefOrRefSignature type)
-		{
-			// Check if the type is an enum
-			TypeSignature underlyingType = type.GetUnderlyingType(instructions.Owner.Owner?.DeclaringModule?.RuntimeContext);
-			return underlyingType is CorLibTypeSignature
-				? instructions.AddStoreIndirect(underlyingType)
-				: AddUnknown(instructions, underlyingType);
 		}
 	}
 
@@ -356,5 +357,11 @@ public static class CilInstructionCollectionExtensions
 				instructions.InitializeDefaultValueForUnknownType(localVariable);
 				break;
 		}
+	}
+
+	private static bool TryGetEnumUnderlyingType(CilInstructionCollection instructions, TypeDefOrRefSignature type, [NotNullWhen(true)] out CorLibTypeSignature? underlyingType)
+	{
+		underlyingType = type.GetUnderlyingType(instructions.Owner.Owner?.DeclaringModule?.RuntimeContext) as CorLibTypeSignature;
+		return underlyingType is not null;
 	}
 }
