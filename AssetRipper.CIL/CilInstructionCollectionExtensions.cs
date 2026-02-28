@@ -94,15 +94,20 @@ public static class CilInstructionCollectionExtensions
 				ElementType.U8 => instructions.Add(CilOpCodes.Ldelem_I8),
 				ElementType.R4 => instructions.Add(CilOpCodes.Ldelem_R4),
 				ElementType.R8 => instructions.Add(CilOpCodes.Ldelem_R8),
-				_ => AddUnknown(instructions, elementType)
+				ElementType.I or ElementType.U => instructions.Add(CilOpCodes.Ldelem_I),
+				ElementType.Object or ElementType.String => instructions.Add(CilOpCodes.Ldelem_Ref),
+				_ => instructions.Add(CilOpCodes.Ldelem, elementType.ToTypeDefOrRef()),
 			},
 			GenericParameterSignature => instructions.Add(CilOpCodes.Ldelem, elementType.ToTypeDefOrRef()),
+			PointerTypeSignature => instructions.Add(CilOpCodes.Ldelem_I),
 			_ => AddUnknown(instructions, elementType)
 		};
 
 		static CilInstruction AddUnknown(CilInstructionCollection instructions, TypeSignature elementType)
 		{
-			return elementType.IsValueType ? instructions.Add(CilOpCodes.Ldelem, elementType.ToTypeDefOrRef()) : instructions.Add(CilOpCodes.Ldelem_Ref);
+			return elementType.IsValueType
+				? instructions.Add(CilOpCodes.Ldelem, elementType.ToTypeDefOrRef())
+				: instructions.Add(CilOpCodes.Ldelem_Ref);
 		}
 	}
 
@@ -123,9 +128,12 @@ public static class CilInstructionCollectionExtensions
 				ElementType.U8 => instructions.Add(CilOpCodes.Stelem_I8),
 				ElementType.R4 => instructions.Add(CilOpCodes.Stelem_R4),
 				ElementType.R8 => instructions.Add(CilOpCodes.Stelem_R8),
-				_ => AddUnknown(instructions, elementType)
+				ElementType.I or ElementType.U => instructions.Add(CilOpCodes.Stelem_I),
+				ElementType.Object or ElementType.String => instructions.Add(CilOpCodes.Stelem_Ref),
+				_ => instructions.Add(CilOpCodes.Stelem, elementType.ToTypeDefOrRef()),
 			},
 			GenericParameterSignature => instructions.Add(CilOpCodes.Stelem, elementType.ToTypeDefOrRef()),
+			PointerTypeSignature => instructions.Add(CilOpCodes.Stelem_I),
 			_ => AddUnknown(instructions, elementType)
 		};
 
