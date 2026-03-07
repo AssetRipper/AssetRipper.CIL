@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="AssetRipper.CIL.Standardizer/AssetRipper.CIL.Standardizer.csproj" />
+  <Project Path="AssetRipper.CIL.Stubber/AssetRipper.CIL.Stubber.csproj" />
+  <Project Path="AssetRipper.CIL.Tests/AssetRipper.CIL.Tests.csproj" />
+  <Project Path="AssetRipper.CIL.Validator/AssetRipper.CIL.Validator.csproj" />
+  <Project Path="AssetRipper.CIL/AssetRipper.CIL.csproj" />
+</Solution>
