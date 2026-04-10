@@ -71,10 +71,11 @@ internal static class MethodStubber
 			MethodSignature? methodSignature = baseConstructor.Signature;
 			if (methodSignature is not null)
 			{
+				GenericContext genericContext = GenericContext.FromMethod(baseConstructor);
 				methodInstructions.Add(CilOpCodes.Ldarg_0);
 				foreach (TypeSignature baseParameterType in methodSignature.ParameterTypes)
 				{
-					methodInstructions.AddDefaultValue(baseParameterType);
+					methodInstructions.AddDefaultValue(baseParameterType.InstantiateGenericTypes(genericContext));
 				}
 				methodInstructions.Add(CilOpCodes.Call, baseConstructor);
 			}
