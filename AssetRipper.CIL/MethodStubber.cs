@@ -143,7 +143,7 @@ internal static class MethodStubber
 			}
 			else
 			{
-				return methodDefinition.DeclaringType.DeclaringModule.DefaultImporter.ImportMethod(baseConstructor);
+				return baseConstructor;
 			}
 		}
 		else if (baseType is TypeSpecification baseTypeSpec)
@@ -163,8 +163,7 @@ internal static class MethodStubber
 			{
 				return null;
 			}
-			IMethodDefOrRef baseConstructorImported = methodDefinition.DeclaringType.DeclaringModule.DefaultImporter.ImportMethod(baseConstructor);
-			return new MemberReference(baseType, baseConstructorImported.Name, baseConstructorImported.Signature);
+			return new MemberReference(baseType, baseConstructor.Name, baseConstructor.Signature);
 		}
 
 		return null;
